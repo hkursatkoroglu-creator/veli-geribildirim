@@ -100,6 +100,34 @@
             border-top: 10px solid #E1FFC7;
             border-right: 10px solid transparent;
         }
+        
+        /* Özel Checkbox Stili */
+        .custom-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            background-color: white;
+            transition: all 0.2s;
+        }
+        .custom-checkbox:checked {
+            background-color: #128C7E;
+            border-color: #128C7E;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
@@ -130,31 +158,27 @@
             <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
                 <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
                     <i class="fas fa-user-graduate text-blue-500"></i>
-                    <h2 class="font-semibold text-gray-700">Öğrenci Bilgileri</h2>
+                    <h2 class="font-semibold text-gray-700">Öğrenci Seçimi</h2>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="input-group">
-                        <label for="classSelect">Sınıf</label>
-                        <select id="classSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
-                            <option value="">Seçiniz</option>
-                            <option value="5A">5/A</option>
-                            <option value="5B">5/B</option>
-                            <option value="6A">6/A</option>
-                            <option value="6B">6/B</option>
-                            <option value="7A">7/A</option>
-                            <option value="7B">7/B</option>
-                            <option value="8A">8/A</option>
-                            <option value="8B">8/B</option>
-                        </select>
+                <div class="input-group mb-4">
+                    <label for="classSelect">Sınıf</label>
+                    <select id="classSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                        <option value="">Seçiniz</option>
+                    </select>
+                </div>
+                
+                <!-- Çoklu Öğrenci Seçim Listesi -->
+                <div class="input-group mb-0 relative" id="studentListContainer">
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="mb-0">Öğrenciler (Çoklu Seçim)</label>
+                        <button type="button" id="selectAllBtn" onclick="toggleSelectAll()" class="text-[11px] font-semibold text-[#128C7E] bg-green-50 px-2 py-1 rounded hidden transition">Tümünü Seç</button>
                     </div>
                     
-                    <div class="input-group">
-                        <label for="studentSelect">Öğrenci</label>
-                        <select id="studentSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px] disabled:opacity-50" disabled>
-                            <option value="">Önce sınıf seçin</option>
-                        </select>
+                    <div id="studentChecklist" class="bg-gray-50 border border-gray-200 rounded-xl p-2 max-h-48 overflow-y-auto space-y-1">
+                        <div class="text-sm text-gray-500 text-center py-4 italic">Önce sınıf seçiniz...</div>
                     </div>
+                    <div class="text-[10px] text-gray-400 mt-1 text-right" id="selectedCountText">0 öğrenci seçildi</div>
                 </div>
             </div>
 
@@ -210,64 +234,63 @@
 
             <!-- İleri Butonu -->
             <button onclick="switchTab('mesaj')" class="w-full bg-[#128C7E] text-white rounded-xl py-4 font-semibold text-lg shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
-                Mesajı Oluştur <i class="fas fa-arrow-right"></i>
+                Mesajları Hazırla <i class="fas fa-arrow-right"></i>
             </button>
         </div>
 
-        <!-- Sekme 2: Mesaj Önizleme -->
+        <!-- Sekme 2: Mesaj Önizleme ve Kuyruk -->
         <div id="tab-mesaj" class="tab-content flex-col p-4 w-full max-w-lg mx-auto h-full">
             
-            <div id="validationWarning" class="bg-red-50 text-red-600 border border-red-200 rounded-xl p-4 flex gap-3 items-start mb-4 hidden">
+            <div id="validationWarning" class="bg-red-50 text-red-600 border border-red-200 rounded-xl p-4 flex gap-3 items-start mb-4 hidden flex-shrink-0">
                 <i class="fas fa-exclamation-circle mt-1"></i>
                 <div class="text-sm">
                     <strong class="block mb-1">Eksik Bilgi!</strong>
-                    Lütfen Form sekmesine dönerek öğrenci, ders ve görev bilgilerini eksiksiz doldurun.
+                    Lütfen Form sekmesine dönerek en az bir öğrenci seçtiğinizden ve görev bilgilerini doldurduğunuzdan emin olun.
                 </div>
             </div>
 
             <!-- WhatsApp Sohbet Ekranı Simülasyonu -->
-            <div id="messagePreviewArea" class="flex-grow flex flex-col justify-end pb-4 transition-opacity duration-300 opacity-50 pointer-events-none">
+            <div id="messagePreviewArea" class="flex-col transition-opacity duration-300 opacity-50 pointer-events-none flex-shrink-0">
                 
-                <div class="text-center mb-4">
-                    <span class="bg-[#D1D7DB] text-gray-700 text-xs px-3 py-1 rounded-lg shadow-sm" id="chatDate">Bugün</span>
+                <div class="text-center mb-2">
+                    <span class="bg-[#D1D7DB] text-gray-700 text-[10px] px-2 py-1 rounded-lg shadow-sm">Taslak Mesaj (Düzenlenebilir)</span>
                 </div>
 
                 <div class="flex justify-end mb-2 w-full">
-                    <div class="w-11/12 max-w-[340px]">
+                    <div class="w-full">
                         <div class="chat-bubble">
-                            <textarea id="finalMessage" class="w-full h-48 resize-none bg-transparent border-none p-0 focus:ring-0 text-[15px] leading-relaxed text-gray-800" spellcheck="false" placeholder="Mesajınız burada görünecek..."></textarea>
-                            
-                            <div class="text-right text-[11px] text-gray-500 mt-1 flex justify-end items-center gap-1">
-                                <span id="msgTime">14:00</span>
-                                <i class="fas fa-check-double text-[#53bdeb]"></i>
+                            <textarea id="finalMessage" class="w-full h-40 resize-none bg-transparent border-none p-0 focus:ring-0 text-[14px] leading-relaxed text-gray-800" spellcheck="false" placeholder="Mesajınız burada görünecek..."></textarea>
+                            <div class="text-right text-[10px] text-gray-500 mt-1">
+                                <i class="fas fa-info-circle"></i> [ÖĞRENCİ ADI] kısımları gönderim anında otomatik değişir.
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Gönderim Kuyruğu Listesi -->
+            <div id="queueContainer" class="flex-grow flex flex-col mt-2 bg-white rounded-t-2xl shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-gray-100 overflow-hidden hidden">
+                <div class="p-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center z-10 flex-shrink-0">
+                    <h3 class="text-xs font-bold text-gray-600 uppercase tracking-wide">Gönderim Listesi</h3>
+                    <span class="text-xs font-semibold bg-[#128C7E] text-white px-2 py-0.5 rounded-full" id="queueCount">0</span>
+                </div>
                 
-                <div class="text-center mt-2">
-                    <span id="targetPhoneInfo" class="text-xs text-gray-500 font-medium bg-white px-3 py-1 rounded-full shadow-sm hidden inline-flex items-center gap-1">
-                        <i class="fab fa-whatsapp text-green-500"></i> Alıcı: <span id="phoneNumText" class="tracking-wider"></span>
-                    </span>
+                <div id="sendQueueList" class="overflow-y-auto p-2 space-y-2 flex-grow pb-20">
+                    <!-- Dinamik liste elemanları buraya gelecek -->
                 </div>
             </div>
 
-            <!-- Aksiyon Butonları -->
-            <div class="mt-auto pt-4 grid grid-cols-4 gap-3 pb-safe">
-                <button onclick="switchTab('form')" class="col-span-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-50 transition shadow-sm">
-                    <i class="fas fa-arrow-left text-lg"></i>
-                    <span class="text-[10px] font-semibold">Geri</span>
-                </button>
-                
-                <button id="copyBtn" onclick="copyMessage()" class="col-span-1 bg-gray-800 text-white rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-700 transition shadow-md disabled:opacity-50" disabled>
-                    <i class="far fa-copy text-lg"></i>
-                    <span class="text-[10px] font-semibold">Kopyala</span>
-                </button>
-                
-                <button id="sendBtn" onclick="sendToWhatsApp()" class="col-span-2 bg-[#25D366] text-white rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-[#1fbc5b] transition shadow-md shadow-green-200 disabled:opacity-50" disabled>
-                    <i class="fab fa-whatsapp text-xl"></i>
-                    <span class="text-xs font-bold uppercase tracking-wide">WhatsApp'ı Aç</span>
-                </button>
+            <!-- Aksiyon Butonları (Sadece Geri ve Kopyala kaldı, Gönderme artık listeden yapılıyor) -->
+            <div class="absolute bottom-16 left-0 w-full p-4 bg-gradient-to-t from-[#EFEAE2] via-[#EFEAE2] to-transparent pointer-events-none">
+                <div class="max-w-lg mx-auto grid grid-cols-2 gap-3 pointer-events-auto">
+                    <button onclick="switchTab('form')" class="col-span-1 bg-white border border-gray-300 text-gray-700 rounded-xl py-3 flex items-center justify-center gap-2 active:bg-gray-50 transition shadow-sm font-semibold">
+                        <i class="fas fa-arrow-left"></i> Düzenle
+                    </button>
+                    
+                    <button id="copyBtn" onclick="copyMessage()" class="col-span-1 bg-gray-800 text-white rounded-xl py-3 flex items-center justify-center gap-2 active:bg-gray-700 transition shadow-md disabled:opacity-50" disabled>
+                        <i class="far fa-copy"></i> Taslağı Kopyala
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -379,7 +402,11 @@
         // --- 2. DOM ELEMENTLERİ ---
         const els = {
             class: document.getElementById('classSelect'),
-            student: document.getElementById('studentSelect'),
+            // studentSelect kaldırıldı, yerine checklist geldi
+            checklist: document.getElementById('studentChecklist'),
+            selectAllBtn: document.getElementById('selectAllBtn'),
+            selectedCountText: document.getElementById('selectedCountText'),
+            
             subject: document.getElementById('subjectSelect'),
             date: document.getElementById('assignmentDate'),
             task: document.getElementById('taskName'),
@@ -389,14 +416,12 @@
             finalMessage: document.getElementById('finalMessage'),
             warning: document.getElementById('validationWarning'),
             
-            btnSend: document.getElementById('sendBtn'),
+            queueContainer: document.getElementById('queueContainer'),
+            sendQueueList: document.getElementById('sendQueueList'),
+            queueCount: document.getElementById('queueCount'),
+            
             btnCopy: document.getElementById('copyBtn'),
-            
-            targetInfo: document.getElementById('targetPhoneInfo'),
-            phoneText: document.getElementById('phoneNumText'),
             msgReadyDot: document.getElementById('msgReadyDot'),
-            
-            msgTime: document.getElementById('msgTime'),
             
             // Veri Yönetimi Sekmesi Elemanları
             newClassName: document.getElementById('newClassName'),
@@ -428,101 +453,193 @@
         
         updateClassSelectDropdowns();
 
-        // Saati sürekli güncelle
-        function updateTime() {
-            const now = new Date();
-            els.msgTime.textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        }
-        updateTime();
-        setInterval(updateTime, 60000);
+        // Seçili öğrencileri tutan dizi
+        let selectedStudentsList = [];
+        let isAllSelected = false;
 
-        // --- STREAMING_CHUNK:Event Listeners ve Mantık... ---
-        // Sınıf seçildiğinde öğrencileri doldur
+        // Sınıf seçildiğinde öğrencileri Checklist olarak doldur
         els.class.addEventListener('change', function() {
-            const selected = this.value;
-            els.student.innerHTML = '<option value="">Öğrenci Seçiniz</option>';
+            const selectedClass = this.value;
+            els.checklist.innerHTML = '';
+            selectedStudentsList = [];
+            updateSelectedCount();
             
-            if (selected && studentsData[selected]) {
-                els.student.disabled = false;
-                els.student.classList.remove('opacity-50');
+            if (selectedClass && studentsData[selectedClass]) {
+                els.selectAllBtn.classList.remove('hidden');
+                isAllSelected = false;
+                els.selectAllBtn.textContent = "Tümünü Seç";
+
+                const students = studentsData[selectedClass];
                 
-                studentsData[selected].forEach(student => {
-                    const option = document.createElement('option');
-                    option.value = JSON.stringify(student); 
-                    option.textContent = `${student.no} - ${student.name}`;
-                    els.student.appendChild(option);
+                students.forEach((student, index) => {
+                    const id = `chk_${selectedClass}_${index}`;
+                    
+                    const div = document.createElement('div');
+                    div.className = "flex items-center p-2 hover:bg-gray-100 rounded-lg transition border-b border-gray-100 last:border-0";
+                    
+                    div.innerHTML = `
+                        <input type="checkbox" id="${id}" value='${JSON.stringify(student)}' class="custom-checkbox student-chk mr-3">
+                        <label for="${id}" class="flex-grow flex justify-between items-center cursor-pointer select-none">
+                            <span class="text-sm font-medium text-gray-800">${student.no} - ${student.name}</span>
+                        </label>
+                    `;
+                    
+                    els.checklist.appendChild(div);
                 });
+
+                // Checkbox değişikliklerini dinle
+                document.querySelectorAll('.student-chk').forEach(chk => {
+                    chk.addEventListener('change', handleStudentSelection);
+                });
+
             } else {
-                els.student.disabled = true;
-                els.student.classList.add('opacity-50');
-                els.student.innerHTML = '<option value="">Önce sınıf seçin</option>';
+                els.selectAllBtn.classList.add('hidden');
+                els.checklist.innerHTML = '<div class="text-sm text-gray-500 text-center py-4 italic">Önce sınıf seçiniz...</div>';
             }
             generateMessage();
         });
 
-        // Diğer inputlar değiştiğinde mesajı anlık olarak üret (ama arka planda)
-        ['student', 'subject', 'date', 'task', 'template'].forEach(id => {
+        // Tümünü Seç / Temizle Mantığı
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.student-chk');
+            isAllSelected = !isAllSelected;
+            
+            checkboxes.forEach(chk => {
+                chk.checked = isAllSelected;
+            });
+            
+            els.selectAllBtn.textContent = isAllSelected ? "Seçimi Temizle" : "Tümünü Seç";
+            handleStudentSelection();
+        }
+
+        // Seçilen öğrencileri listeye at ve sayacı güncelle
+        function handleStudentSelection() {
+            const checkboxes = document.querySelectorAll('.student-chk:checked');
+            selectedStudentsList = Array.from(checkboxes).map(chk => JSON.parse(chk.value));
+            updateSelectedCount();
+            generateMessage();
+        }
+
+        function updateSelectedCount() {
+            els.selectedCountText.textContent = `${selectedStudentsList.length} öğrenci seçildi`;
+            els.queueCount.textContent = selectedStudentsList.length;
+        }
+
+        // Diğer inputlar değiştiğinde mesajı anlık olarak üret
+        ['subject', 'date', 'task', 'template'].forEach(id => {
             els[id].addEventListener('input', generateMessage);
             els[id].addEventListener('change', generateMessage);
         });
 
         function isFormValid() {
-            return els.class.value && els.student.value && els.subject.value && els.date.value && els.task.value.trim() !== '';
+            return els.class.value && selectedStudentsList.length > 0 && els.subject.value && els.date.value && els.task.value.trim() !== '';
         }
 
-        // --- 4. MESAJ ÜRETİMİ ---
+        // --- 4. MESAJ ÜRETİMİ VE KUYRUK OLUŞTURMA ---
         function generateMessage() {
             if (!isFormValid()) {
                 els.msgReadyDot.classList.add('hidden');
                 els.messageArea.classList.add('opacity-50', 'pointer-events-none');
+                els.queueContainer.classList.add('hidden');
                 els.warning.classList.remove('hidden');
-                els.btnSend.disabled = true;
                 els.btnCopy.disabled = true;
-                els.targetInfo.classList.add('hidden');
                 els.finalMessage.value = "";
+                els.sendQueueList.innerHTML = "";
                 return;
             }
 
             // Form tamamsa
             els.msgReadyDot.classList.remove('hidden');
             els.messageArea.classList.remove('opacity-50', 'pointer-events-none');
+            els.queueContainer.classList.remove('hidden');
+            els.queueContainer.classList.add('flex');
             els.warning.classList.add('hidden');
-            els.btnSend.disabled = false;
             els.btnCopy.disabled = false;
 
-            const studentObj = JSON.parse(els.student.value);
-            // Sadece ilk ismi al ve baş harfi büyük yap
-            const nameParts = studentObj.name.split(' ');
-            let firstName = nameParts[0];
-            // Eğer çift isimliyse ve çok kısa değilse ikisini de al (opsiyonel mantık)
-            if(nameParts.length > 2 && firstName.length < 4) {
-                 firstName = nameParts[0] + ' ' + nameParts[1];
-            }
-
-            const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLocaleLowerCase('tr-TR');
             const dateObj = new Date(els.date.value);
             const formattedDate = dateObj.toLocaleDateString('tr-TR');
             const subject = els.subject.value;
             const task = els.task.value.trim();
             const type = els.template.value;
 
+            // Öğrenci adı yerine dinamik yer tutucu: [ÖĞRENCİ ADI]
             let msg = "";
 
             if (type === 'destekleyici') {
-                msg = `Kıymetli Velimiz Merhaba,\n\nÖğrencimiz ${formattedName}'nin akademik gelişimini desteklemek amacıyla ${formattedDate} tarihinde ${subject} dersinden vermiş olduğumuz "${task}" çalışmasının maalesef tamamlanmadığını fark ettik.\n\nÇocuklarımızın öğrenme sürecinin pekişmesi için bu tekrarlar oldukça önemlidir. Evde kendisine uygun çalışma ortamını sağlamanız ve görevi tamamlaması için motive etmeniz konusunda desteğinizi rica ediyorum.\n\nİşbirliğiniz için teşekkür eder, iyi günler dilerim. 🌸`;
+                msg = `Kıymetli Velimiz Merhaba,\n\nÖğrencimiz [ÖĞRENCİ ADI]'nın akademik gelişimini desteklemek amacıyla ${formattedDate} tarihinde ${subject} dersinden vermiş olduğumuz "${task}" çalışmasının maalesef tamamlanmadığını fark ettik.\n\nÇocuklarımızın öğrenme sürecinin pekişmesi için bu tekrarlar oldukça önemlidir. Evde kendisine uygun çalışma ortamını sağlamanız ve görevi tamamlaması için motive etmeniz konusunda desteğinizi rica ediyorum.\n\nİşbirliğiniz için teşekkür eder, iyi günler dilerim. 🌸`;
             } 
             else if (type === 'bilgilendirici') {
-                msg = `Sayın Velimiz İyi Günler,\n\nÖğrencimiz ${formattedName}, ${subject} dersinden ${formattedDate} tarihinde verilen "${task}" konulu ödevini/görevini yerine getirmemiştir.\n\nKonunun takibi ve eksiklerin telafisi hususunda bilginizi rica eder, öğrencinin evdeki çalışmalarında destek olmanızı bekleriz.\n\nİyi çalışmalar.`;
+                msg = `Sayın Velimiz İyi Günler,\n\nÖğrencimiz [ÖĞRENCİ ADI], ${subject} dersinden ${formattedDate} tarihinde verilen "${task}" konulu ödevini/görevini yerine getirmemiştir.\n\nKonunun takibi ve eksiklerin telafisi hususunda bilginizi rica eder, öğrencinin evdeki çalışmalarında destek olmanızı bekleriz.\n\nİyi çalışmalar.`;
             }
             else if (type === 'cozumOdakli') {
-                msg = `Değerli Velimiz Merhabalar,\n\n${formattedName} ile ilgili ${subject} dersi özelinde bir durumu paylaşmak istedim. ${formattedDate} tarihli "${task}" görevimiz ne yazık ki yapılmamış görünüyor.\n\nBazen öğrencilerimiz zaman yönetiminde zorlanabiliyor. Sizden ricam, bu çalışmayı yapması için durumu takip etmenizdir. Eğer konuyu anlamakta zorlandığı bir yer varsa lütfen bana geri dönüş yapınız ki okulda da destekleyebileyim.\n\nAnlayışınız ve desteğiniz için teşekkürler.`;
+                msg = `Değerli Velimiz Merhabalar,\n\n[ÖĞRENCİ ADI] ile ilgili ${subject} dersi özelinde bir durumu paylaşmak istedim. ${formattedDate} tarihli "${task}" görevimiz ne yazık ki yapılmamış görünüyor.\n\nBazen öğrencilerimiz zaman yönetiminde zorlanabiliyor. Sizden ricam, bu çalışmayı yapması için durumu takip etmenizdir. Eğer konuyu anlamakta zorlandığı bir yer varsa lütfen bana geri dönüş yapınız ki okulda da destekleyebileyim.\n\nAnlayışınız ve desteğiniz için teşekkürler.`;
             }
 
             els.finalMessage.value = msg;
             
-            // Telefon bilgisini güncelle
-            els.phoneText.textContent = studentObj.phone;
-            els.targetInfo.classList.remove('hidden');
+            // Kuyruk Arayüzünü Oluştur
+            buildQueueUI();
+        }
+
+        // Gönderim Kuyruğu HTML'ini oluşturur
+        function buildQueueUI() {
+            els.sendQueueList.innerHTML = '';
+            
+            selectedStudentsList.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.id = `queueItem-${index}`;
+                item.className = "flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm transition-colors";
+                
+                item.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-800">${student.name}</span>
+                        <span class="text-[10px] text-gray-500 font-mono">${student.phone}</span>
+                    </div>
+                    <button id="queueBtn-${index}" onclick="sendToSpecificStudent(${index})" class="bg-[#25D366] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md shadow-green-200 active:scale-90 transition">
+                        <i class="fab fa-whatsapp text-lg"></i>
+                    </button>
+                `;
+                els.sendQueueList.appendChild(item);
+            });
+        }
+
+        // Belli bir öğrenciye mesaj gönder (Adını değiştirerek)
+        function sendToSpecificStudent(index) {
+            const student = selectedStudentsList[index];
+            const baseText = els.finalMessage.value;
+            
+            // İsmi formatla (Sadece ilk ismi al, baş harfi büyük)
+            const nameParts = student.name.split(' ');
+            let firstName = nameParts[0];
+            if(nameParts.length > 2 && firstName.length < 4) firstName += ' ' + nameParts[1];
+            const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLocaleLowerCase('tr-TR');
+            
+            // Yer tutucuyu gerçek isimle değiştir (Büyük/küçük ünlü uyumuna tam girmese de 'nın/'nin için genel isim yeterlidir)
+            const finalPersonalizedMsg = baseText.replace(/\[ÖĞRENCİ ADI\]/g, formattedName);
+            
+            // Telefon numarasını formatla
+            let phone = student.phone.replace(/\D/g, '');
+            if (phone.startsWith('0')) phone = '90' + phone.substring(1);
+            else if (!phone.startsWith('90')) phone = '90' + phone;
+
+            const encodedText = encodeURIComponent(finalPersonalizedMsg);
+            const url = `https://wa.me/${phone}?text=${encodedText}`;
+            
+            // WhatsApp'ı aç
+            window.open(url, '_blank');
+            
+            // Gönderildi İşareti Koy
+            const itemDiv = document.getElementById(`queueItem-${index}`);
+            const btn = document.getElementById(`queueBtn-${index}`);
+            
+            itemDiv.classList.add('bg-green-50', 'border-green-200');
+            itemDiv.classList.remove('bg-white', 'border-gray-200');
+            
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.remove('bg-[#25D366]');
+            btn.classList.add('bg-green-600');
+            
+            showToast(`${formattedName} için WhatsApp açılıyor...`);
         }
 
         // --- STREAMING_CHUNK:Navigasyon, Gönderim ve Yardımcı Fonksiyonlar... ---
@@ -617,9 +734,10 @@
         }
 
         function resetForm() {
-            els.student.innerHTML = '<option value="">Önce sınıf seçin</option>';
-            els.student.disabled = true;
-            els.student.classList.add('opacity-50');
+            els.checklist.innerHTML = '<div class="text-sm text-gray-500 text-center py-4 italic">Önce sınıf seçiniz...</div>';
+            els.selectAllBtn.classList.add('hidden');
+            selectedStudentsList = [];
+            updateSelectedCount();
             
             els.class.value = "";
             els.subject.value = "";
