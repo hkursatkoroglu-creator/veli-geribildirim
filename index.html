@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="tr" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#25D366">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Veli Bilgilendirme Uygulaması</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --wa-green: #25D366;
+            --wa-dark: #128C7E;
+            --wa-bg: #EFEAE2;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F2F5; /* WhatsApp benzeri arka plan */
+            -webkit-tap-highlight-color: transparent; /* Mobilde tıklama parlaklığını kaldır */
+            overscroll-behavior-y: none; /* Mobilde sekmeyi aşağı çekip yenilemeyi engelle (app hissi) */
+        }
+
+        /* Native select ok işaretini gizleme ve özelleştirme */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        /* Custom Scrollbar for better look on devices that show it */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Sekme geçiş animasyonları */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Floating Label Effect */
+        .input-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4B5563;
+            margin-bottom: 0.3rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* WhatsApp Chat Balonu */
+        .chat-bubble {
+            position: relative;
+            background: #E1FFC7; /* WhatsApp yeşil balon */
+            border-radius: 12px;
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 12px 14px;
+        }
+        .chat-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid #E1FFC7;
+            border-right: 10px solid transparent;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-gray-800">
+
+    <!-- Üst Bar (App Bar) -->
+    <header class="bg-[#128C7E] text-white pt-safe pb-4 px-4 shadow-md z-20 flex-shrink-0 flex items-center justify-between">
+        <!-- SafeArea için pt eklendi (iOS çentik/Android status bar için) -->
+        <div class="mt-2 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-semibold leading-tight">Veli İletişim</h1>
+                <p class="text-[11px] opacity-80">Görev Takip Sistemi</p>
+            </div>
+        </div>
+        <button id="resetBtn" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition" onclick="resetForm()">
+            <i class="fas fa-rotate-right"></i>
+        </button>
+    </header>
+
+    <!-- Ana İçerik Alanı -->
+    <main class="flex-grow overflow-y-auto pb-24 relative bg-[#EFEAE2]">
+        
+        <!-- Sekme 1: Form Alanı -->
+        <div id="tab-form" class="tab-content active flex-col p-4 w-full max-w-lg mx-auto">
+            
+            <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+                    <i class="fas fa-user-graduate text-blue-500"></i>
+                    <h2 class="font-semibold text-gray-700">Öğrenci Bilgileri</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="input-group">
+                        <label for="classSelect">Sınıf</label>
+                        <select id="classSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                            <option value="">Seçiniz</option>
+                            <option value="5A">5/A</option>
+                            <option value="5B">5/B</option>
+                            <option value="6A">6/A</option>
+                            <option value="6B">6/B</option>
+                            <option value="7A">7/A</option>
+                            <option value="7B">7/B</option>
+                            <option value="8A">8/A</option>
+                            <option value="8B">8/B</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="studentSelect">Öğrenci</label>
+                        <select id="studentSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px] disabled:opacity-50" disabled>
+                            <option value="">Önce sınıf seçin</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+                    <i class="fas fa-book-open text-orange-500"></i>
+                    <h2 class="font-semibold text-gray-700">Görev Detayları</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="input-group">
+                        <label for="subjectSelect">Ders</label>
+                        <select id="subjectSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                            <option value="">Seçiniz</option>
+                            <option value="Türkçe">Türkçe</option>
+                            <option value="Matematik">Matematik</option>
+                            <option value="Fen Bilimleri">Fen Bilimleri</option>
+                            <option value="Sosyal Bilgiler">Sosyal Bilgiler</option>
+                            <option value="İngilizce">İngilizce</option>
+                            <option value="Din K. ve A.B.">Din K. ve A.B.</option>
+                            <option value="Bilişim">Bilişim Tek.</option>
+                            <option value="Görsel Sanatlar">Görsel Sanatlar</option>
+                            <option value="Müzik">Müzik</option>
+                            <option value="Beden Eğitimi">Beden Eğitimi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="assignmentDate">Tarih</label>
+                        <input type="date" id="assignmentDate" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="taskName">Ödev/Görev Konusu</label>
+                    <input type="text" id="taskName" placeholder="Örn: 1. Ünite Değerlendirme, Sayfa 45..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5 mb-8">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+                    <i class="fas fa-comment-dots text-purple-500"></i>
+                    <h2 class="font-semibold text-gray-700">Mesaj Dili</h2>
+                </div>
+                <div class="input-group mb-0">
+                    <select id="templateSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                        <option value="destekleyici">🌱 Destekleyici (Önerilen)</option>
+                        <option value="bilgilendirici">ℹ️ Doğrudan Bilgilendirici</option>
+                        <option value="cozumOdakli">🤝 Çözüm Odaklı</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- İleri Butonu -->
+            <button onclick="switchTab('mesaj')" class="w-full bg-[#128C7E] text-white rounded-xl py-4 font-semibold text-lg shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
+                Mesajı Oluştur <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Sekme 2: Mesaj Önizleme -->
+        <div id="tab-mesaj" class="tab-content flex-col p-4 w-full max-w-lg mx-auto h-full">
+            
+            <div id="validationWarning" class="bg-red-50 text-red-600 border border-red-200 rounded-xl p-4 flex gap-3 items-start mb-4 hidden">
+                <i class="fas fa-exclamation-circle mt-1"></i>
+                <div class="text-sm">
+                    <strong class="block mb-1">Eksik Bilgi!</strong>
+                    Lütfen Form sekmesine dönerek öğrenci, ders ve görev bilgilerini eksiksiz doldurun.
+                </div>
+            </div>
+
+            <!-- WhatsApp Sohbet Ekranı Simülasyonu -->
+            <div id="messagePreviewArea" class="flex-grow flex flex-col justify-end pb-4 transition-opacity duration-300 opacity-50 pointer-events-none">
+                
+                <div class="text-center mb-4">
+                    <span class="bg-[#D1D7DB] text-gray-700 text-xs px-3 py-1 rounded-lg shadow-sm" id="chatDate">Bugün</span>
+                </div>
+
+                <div class="flex justify-end mb-2 w-full">
+                    <div class="w-11/12 max-w-[340px]">
+                        <div class="chat-bubble">
+                            <textarea id="finalMessage" class="w-full h-48 resize-none bg-transparent border-none p-0 focus:ring-0 text-[15px] leading-relaxed text-gray-800" spellcheck="false" placeholder="Mesajınız burada görünecek..."></textarea>
+                            
+                            <div class="text-right text-[11px] text-gray-500 mt-1 flex justify-end items-center gap-1">
+                                <span id="msgTime">14:00</span>
+                                <i class="fas fa-check-double text-[#53bdeb]"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-2">
+                    <span id="targetPhoneInfo" class="text-xs text-gray-500 font-medium bg-white px-3 py-1 rounded-full shadow-sm hidden inline-flex items-center gap-1">
+                        <i class="fab fa-whatsapp text-green-500"></i> Alıcı: <span id="phoneNumText" class="tracking-wider"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div class="mt-auto pt-4 grid grid-cols-4 gap-3 pb-safe">
+                <button onclick="switchTab('form')" class="col-span-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-50 transition shadow-sm">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                    <span class="text-[10px] font-semibold">Geri</span>
+                </button>
+                
+                <button id="copyBtn" onclick="copyMessage()" class="col-span-1 bg-gray-800 text-white rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-700 transition shadow-md disabled:opacity-50" disabled>
+                    <i class="far fa-copy text-lg"></i>
+                    <span class="text-[10px] font-semibold">Kopyala</span>
+                </button>
+                
+                <button id="sendBtn" onclick="sendToWhatsApp()" class="col-span-2 bg-[#25D366] text-white rounded-xl py-3 flex flex-col items-center justify-center gap-1 active:bg-[#1fbc5b] transition shadow-md shadow-green-200 disabled:opacity-50" disabled>
+                    <i class="fab fa-whatsapp text-xl"></i>
+                    <span class="text-xs font-bold uppercase tracking-wide">WhatsApp'ı Aç</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sekme 3: Veri Yönetimi (Sınıf ve Öğrenci Ekleme) -->
+        <div id="tab-veri" class="tab-content flex-col p-4 w-full max-w-lg mx-auto h-full pb-8">
+            <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+                    <i class="fas fa-plus-circle text-green-500 text-lg"></i>
+                    <h2 class="font-semibold text-gray-700">Yeni Sınıf Oluştur</h2>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="newClassName" placeholder="Sınıf Adı (Örn: 9A)" class="flex-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] p-3 uppercase">
+                    <button onclick="createNewClass()" class="bg-[#128C7E] text-white px-5 rounded-xl font-semibold active:scale-95 transition shadow-sm">Ekle</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+                    <i class="fas fa-file-excel text-green-600 text-lg"></i>
+                    <h2 class="font-semibold text-gray-700">Excel'den Öğrenci Aktar</h2>
+                </div>
+                
+                <div class="input-group mb-3">
+                    <label for="dataClassSelect">Aktarılacak Sınıf</label>
+                    <select id="dataClassSelect" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition h-[50px]">
+                        <!-- JavaScript ile dinamik dolacak -->
+                    </select>
+                </div>
+
+                <div class="input-group mb-4">
+                    <label for="excelDataInput">Excel Verisi (Kopyala - Yapıştır)</label>
+                    <textarea id="excelDataInput" rows="5" placeholder="Excel'den yan yana 3 sütunu kopyalayıp buraya yapıştırın.&#10;&#10;Sıra: [No]  [Ad Soyad]  [Telefon]" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#128C7E] focus:border-[#128C7E] block p-3 transition resize-none"></textarea>
+                    <p class="text-[10px] text-gray-500 mt-2 flex items-start gap-1">
+                        <i class="fas fa-info-circle mt-0.5"></i> 
+                        <span>İpucu: Excel listenizdeki sadece No, İsim ve Telefon sütunlarını seçip Ctrl+C yapın ve bu kutuya yapıştırın. Sistem otomatik ayıklayacaktır.</span>
+                    </p>
+                </div>
+
+                <button onclick="importStudents()" class="w-full bg-gray-800 text-white rounded-xl py-4 font-semibold text-sm active:scale-95 transition flex justify-center items-center gap-2 shadow-md">
+                    <i class="fas fa-users"></i> Listeye Ekle ve Kaydet
+                </button>
+                
+                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                    <button onclick="clearAllData()" class="text-red-500 text-xs font-medium py-2 px-4 active:bg-red-50 rounded-lg transition">
+                        <i class="fas fa-trash-alt mr-1"></i> Tüm Kayıtlı Verileri Sıfırla
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Alt Navigasyon (Mobile Bottom Bar) -->
+    <nav class="bg-white border-t border-gray-200 pb-safe shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.1)] flex-shrink-0 z-20">
+        <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
+            <button onclick="switchTab('form')" id="nav-form" class="flex-1 h-full flex flex-col items-center justify-center text-[#128C7E] transition relative">
+                <i class="fas fa-edit text-xl mb-1 transition-transform scale-110"></i>
+                <span class="text-[11px] font-medium">Bilgi Girişi</span>
+                <div class="absolute top-0 w-8 h-1 bg-[#128C7E] rounded-b-md nav-indicator transition-colors"></div>
+            </button>
+            
+            <button onclick="switchTab('mesaj')" id="nav-mesaj" class="flex-1 h-full flex flex-col items-center justify-center text-gray-400 transition relative">
+                <div class="relative">
+                    <i class="fab fa-whatsapp text-xl mb-1 transition-transform"></i>
+                    <!-- Bildirim Noktası -->
+                    <span id="msgReadyDot" class="absolute -top-1 -right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white hidden"></span>
+                </div>
+                <span class="text-[11px] font-medium">Mesaj Gönder</span>
+                <div class="absolute top-0 w-8 h-1 bg-transparent rounded-b-md nav-indicator transition-colors"></div>
+            </button>
+            
+            <!-- Yeni Sekme: Sınıf Yönetimi -->
+            <button onclick="switchTab('veri')" id="nav-veri" class="flex-1 h-full flex flex-col items-center justify-center text-gray-400 transition relative">
+                <i class="fas fa-users-cog text-xl mb-1 transition-transform"></i>
+                <span class="text-[11px] font-medium">Sınıf Yönt.</span>
+                <div class="absolute top-0 w-8 h-1 bg-transparent rounded-b-md nav-indicator transition-colors"></div>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Toast Bildirimi -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-10 opacity-0 transition-all duration-300 bg-gray-900 text-white px-5 py-3 rounded-full shadow-lg text-sm flex items-center gap-3 z-50 pointer-events-none">
+        <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg" class="font-medium whitespace-nowrap"></span>
+    </div>
+
+    <script>
+        // --- 1. VERİLER (Varsayılan Örnekler ve LocalStorage) ---
+        const defaultStudentsData = {
+            "5A": [{ no: "101", name: "ALİ YILMAZ", phone: "05551112233" }],
+            "5B": [{ no: "102", name: "AYŞE DEMİR", phone: "05552223344" }],
+            "6A": [{ no: "201", name: "MEHMET KAYA", phone: "05553334455" }],
+            "6B": [{ no: "202", name: "ÖRNEK ÖĞRENCİ", phone: "05550000000" }],
+            "7A": [{ no: "301", name: "ZEYNEP ÇELİK", phone: "05554445566" }],
+            "7B": [{ no: "302", name: "BURAK ŞAHİN", phone: "05555556677" }],
+            "8A": [{ no: "401", name: "ELİF ARSLAN", phone: "05556667788" }],
+            "8B": [{ no: "402", name: "ONUR BOZ", phone: "05557778899" }]
+        };
+
+        // Cihazın hafızasından kayıtlı verileri çek (Yoksa varsayılanı kullan)
+        let studentsData = JSON.parse(localStorage.getItem('veliApp_studentsData')) || defaultStudentsData;
+
+        // Verileri hafızaya kaydetme fonksiyonu
+        function saveDataToStorage() {
+            localStorage.setItem('veliApp_studentsData', JSON.stringify(studentsData));
+            updateClassSelectDropdowns();
+        }
+
+        // --- 2. DOM ELEMENTLERİ ---
+        const els = {
+            class: document.getElementById('classSelect'),
+            student: document.getElementById('studentSelect'),
+            subject: document.getElementById('subjectSelect'),
+            date: document.getElementById('assignmentDate'),
+            task: document.getElementById('taskName'),
+            template: document.getElementById('templateSelect'),
+            
+            messageArea: document.getElementById('messagePreviewArea'),
+            finalMessage: document.getElementById('finalMessage'),
+            warning: document.getElementById('validationWarning'),
+            
+            btnSend: document.getElementById('sendBtn'),
+            btnCopy: document.getElementById('copyBtn'),
+            
+            targetInfo: document.getElementById('targetPhoneInfo'),
+            phoneText: document.getElementById('phoneNumText'),
+            msgReadyDot: document.getElementById('msgReadyDot'),
+            
+            msgTime: document.getElementById('msgTime'),
+            
+            // Veri Yönetimi Sekmesi Elemanları
+            newClassName: document.getElementById('newClassName'),
+            dataClassSelect: document.getElementById('dataClassSelect'),
+            excelDataInput: document.getElementById('excelDataInput')
+        };
+
+        // --- 3. İLK KURULUMLAR ---
+        // Tarihi bugüne ayarla
+        els.date.valueAsDate = new Date();
+        
+        // Sınıf dropdown'larını mevcut verilere göre doldur
+        function updateClassSelectDropdowns() {
+            const currentMainVal = els.class.value;
+            const currentDataVal = els.dataClassSelect ? els.dataClassSelect.value : "";
+            
+            els.class.innerHTML = '<option value="">Seçiniz</option>';
+            if(els.dataClassSelect) els.dataClassSelect.innerHTML = '<option value="">Seçiniz</option>';
+            
+            // Sınıfları alfabetik sırala
+            Object.keys(studentsData).sort().forEach(className => {
+                els.class.add(new Option(className, className));
+                if(els.dataClassSelect) els.dataClassSelect.add(new Option(className, className));
+            });
+
+            els.class.value = currentMainVal;
+            if(els.dataClassSelect) els.dataClassSelect.value = currentDataVal;
+        }
+        
+        updateClassSelectDropdowns();
+
+        // Saati sürekli güncelle
+        function updateTime() {
+            const now = new Date();
+            els.msgTime.textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // --- STREAMING_CHUNK:Event Listeners ve Mantık... ---
+        // Sınıf seçildiğinde öğrencileri doldur
+        els.class.addEventListener('change', function() {
+            const selected = this.value;
+            els.student.innerHTML = '<option value="">Öğrenci Seçiniz</option>';
+            
+            if (selected && studentsData[selected]) {
+                els.student.disabled = false;
+                els.student.classList.remove('opacity-50');
+                
+                studentsData[selected].forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(student); 
+                    option.textContent = `${student.no} - ${student.name}`;
+                    els.student.appendChild(option);
+                });
+            } else {
+                els.student.disabled = true;
+                els.student.classList.add('opacity-50');
+                els.student.innerHTML = '<option value="">Önce sınıf seçin</option>';
+            }
+            generateMessage();
+        });
+
+        // Diğer inputlar değiştiğinde mesajı anlık olarak üret (ama arka planda)
+        ['student', 'subject', 'date', 'task', 'template'].forEach(id => {
+            els[id].addEventListener('input', generateMessage);
+            els[id].addEventListener('change', generateMessage);
+        });
+
+        function isFormValid() {
+            return els.class.value && els.student.value && els.subject.value && els.date.value && els.task.value.trim() !== '';
+        }
+
+        // --- 4. MESAJ ÜRETİMİ ---
+        function generateMessage() {
+            if (!isFormValid()) {
+                els.msgReadyDot.classList.add('hidden');
+                els.messageArea.classList.add('opacity-50', 'pointer-events-none');
+                els.warning.classList.remove('hidden');
+                els.btnSend.disabled = true;
+                els.btnCopy.disabled = true;
+                els.targetInfo.classList.add('hidden');
+                els.finalMessage.value = "";
+                return;
+            }
+
+            // Form tamamsa
+            els.msgReadyDot.classList.remove('hidden');
+            els.messageArea.classList.remove('opacity-50', 'pointer-events-none');
+            els.warning.classList.add('hidden');
+            els.btnSend.disabled = false;
+            els.btnCopy.disabled = false;
+
+            const studentObj = JSON.parse(els.student.value);
+            // Sadece ilk ismi al ve baş harfi büyük yap
+            const nameParts = studentObj.name.split(' ');
+            let firstName = nameParts[0];
+            // Eğer çift isimliyse ve çok kısa değilse ikisini de al (opsiyonel mantık)
+            if(nameParts.length > 2 && firstName.length < 4) {
+                 firstName = nameParts[0] + ' ' + nameParts[1];
+            }
+
+            const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLocaleLowerCase('tr-TR');
+            const dateObj = new Date(els.date.value);
+            const formattedDate = dateObj.toLocaleDateString('tr-TR');
+            const subject = els.subject.value;
+            const task = els.task.value.trim();
+            const type = els.template.value;
+
+            let msg = "";
+
+            if (type === 'destekleyici') {
+                msg = `Kıymetli Velimiz Merhaba,\n\nÖğrencimiz ${formattedName}'nin akademik gelişimini desteklemek amacıyla ${formattedDate} tarihinde ${subject} dersinden vermiş olduğumuz "${task}" çalışmasının maalesef tamamlanmadığını fark ettik.\n\nÇocuklarımızın öğrenme sürecinin pekişmesi için bu tekrarlar oldukça önemlidir. Evde kendisine uygun çalışma ortamını sağlamanız ve görevi tamamlaması için motive etmeniz konusunda desteğinizi rica ediyorum.\n\nİşbirliğiniz için teşekkür eder, iyi günler dilerim. 🌸`;
+            } 
+            else if (type === 'bilgilendirici') {
+                msg = `Sayın Velimiz İyi Günler,\n\nÖğrencimiz ${formattedName}, ${subject} dersinden ${formattedDate} tarihinde verilen "${task}" konulu ödevini/görevini yerine getirmemiştir.\n\nKonunun takibi ve eksiklerin telafisi hususunda bilginizi rica eder, öğrencinin evdeki çalışmalarında destek olmanızı bekleriz.\n\nİyi çalışmalar.`;
+            }
+            else if (type === 'cozumOdakli') {
+                msg = `Değerli Velimiz Merhabalar,\n\n${formattedName} ile ilgili ${subject} dersi özelinde bir durumu paylaşmak istedim. ${formattedDate} tarihli "${task}" görevimiz ne yazık ki yapılmamış görünüyor.\n\nBazen öğrencilerimiz zaman yönetiminde zorlanabiliyor. Sizden ricam, bu çalışmayı yapması için durumu takip etmenizdir. Eğer konuyu anlamakta zorlandığı bir yer varsa lütfen bana geri dönüş yapınız ki okulda da destekleyebileyim.\n\nAnlayışınız ve desteğiniz için teşekkürler.`;
+            }
+
+            els.finalMessage.value = msg;
+            
+            // Telefon bilgisini güncelle
+            els.phoneText.textContent = studentObj.phone;
+            els.targetInfo.classList.remove('hidden');
+        }
+
+        // --- STREAMING_CHUNK:Navigasyon, Gönderim ve Yardımcı Fonksiyonlar... ---
+        // Sekme Değiştirme Animasyonu
+        function switchTab(tabId) {
+            // Form kontrolü (Mesaj sekmesine geçerken)
+            if (tabId === 'mesaj') {
+                generateMessage(); // Durumu güncelle
+            }
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Bottom Nav UI Güncelleme
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-[#128C7E]');
+                btn.classList.add('text-gray-400');
+                btn.querySelector('i').classList.remove('scale-110');
+                btn.querySelector('.nav-indicator').classList.remove('bg-[#128C7E]');
+                btn.querySelector('.nav-indicator').classList.add('bg-transparent');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-gray-400');
+            activeBtn.classList.add('text-[#128C7E]');
+            activeBtn.querySelector('i').classList.add('scale-110');
+            activeBtn.querySelector('.nav-indicator').classList.add('bg-[#128C7E]');
+            activeBtn.querySelector('.nav-indicator').classList.remove('bg-transparent');
+
+            // Bildirim noktasını mesaj sekmesine geçildiğinde gizle
+            if (tabId === 'mesaj') {
+                els.msgReadyDot.classList.add('hidden');
+            }
+        }
+
+        // WhatsApp'a Gönder
+        function sendToWhatsApp() {
+            if (!isFormValid()) {
+                switchTab('form');
+                showToast("Lütfen formu doldurun", "error");
+                return;
+            }
+
+            const studentObj = JSON.parse(els.student.value);
+            let phone = studentObj.phone.replace(/\D/g, ''); // Sadece rakamlar
+            
+            // Türkiye telefon formatı düzeltmesi (0 ile başlıyorsa 90 yap, değilse 90 ekle)
+            if (phone.startsWith('0')) phone = '90' + phone.substring(1);
+            else if (!phone.startsWith('90')) phone = '90' + phone;
+
+            const text = encodeURIComponent(els.finalMessage.value);
+            
+            // Universal Link kullanarak yönlendirme (Android/iOS uyumlu)
+            // Cihazda WhatsApp varsa uygulamayı açar, yoksa web sayfasına yönlendirir.
+            const url = `https://wa.me/${phone}?text=${text}`;
+            
+            // Yeni sekmede / native uygulamada aç
+            window.open(url, '_blank');
+            showToast("WhatsApp açılıyor...");
+        }
+
+        // Metni Kopyala (Fallback destekli)
+        function copyMessage() {
+            const text = els.finalMessage.value;
+            if (!text) return;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Mesaj kopyalandı!");
+                }).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Mesaj kopyalandı!");
+            } catch (err) {
+                showToast("Kopyalama başarısız", "error");
+            }
+            textArea.remove();
+        }
+
+        function resetForm() {
+            els.student.innerHTML = '<option value="">Önce sınıf seçin</option>';
+            els.student.disabled = true;
+            els.student.classList.add('opacity-50');
+            
+            els.class.value = "";
+            els.subject.value = "";
+            els.task.value = "";
+            els.template.value = "destekleyici";
+            
+            switchTab('form');
+            generateMessage();
+            showToast("Form temizlendi", "info");
+        }
+
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const icon = document.getElementById('toastIcon');
+            
+            toastMsg.textContent = message;
+            
+            // İkonu ayarla
+            icon.className = ''; // Tüm sınıfları temizle
+            if (type === "error") {
+                icon.className = 'fas fa-exclamation-circle text-red-400 text-lg';
+            } else if (type === "info") {
+                icon.className = 'fas fa-info-circle text-blue-400 text-lg';
+            } else {
+                icon.className = 'fas fa-check-circle text-green-400 text-lg';
+            }
+            
+            // Göster
+            toast.classList.remove('-translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            // Gizle
+            setTimeout(() => {
+                toast.classList.add('-translate-y-10', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2500);
+        }
+
+        // --- YENİ EKLENEN: Sınıf ve Öğrenci Yönetim Mantığı ---
+
+        // Yeni Sınıf Ekle
+        function createNewClass() {
+            const className = els.newClassName.value.trim().toUpperCase();
+            if (!className) {
+                showToast("Lütfen bir sınıf adı girin", "error");
+                return;
+            }
+            if (studentsData[className]) {
+                showToast("Bu sınıf zaten mevcut!", "error");
+                return;
+            }
+            
+            // Yeni boş dizi oluştur ve kaydet
+            studentsData[className] = [];
+            saveDataToStorage();
+            els.newClassName.value = "";
+            showToast(`${className} sınıfı eklendi!`);
+            
+            // Seçili sınıfı yeni eklenen yap
+            els.dataClassSelect.value = className;
+        }
+
+        // Excel'den Toplu Veri Aktarımı (Kopyala-Yapıştır Parse)
+        function importStudents() {
+            const className = els.dataClassSelect.value;
+            const rawData = els.excelDataInput.value;
+            
+            if (!className) {
+                showToast("Lütfen listeye eklenecek sınıfı seçin", "error");
+                return;
+            }
+            if (!rawData.trim()) {
+                showToast("Lütfen excel verisini yapıştırın", "error");
+                return;
+            }
+
+            const lines = rawData.split('\n');
+            let addedCount = 0;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return; // Boş satırları atla
+
+                // Excel'den kopyalanınca genellikle Tab (\t) ile ayrılır. 
+                // Yedek olarak çift boşluk veya noktalı virgül ihtimalini de yakalıyoruz.
+                let parts = line.split(/\t|;| {2,}/);
+                
+                // Eğer ayıramadıysa (Kullanıcı yanlış kopyaladıysa) Regex ile tahmin etmeye çalış
+                if (parts.length < 3) {
+                    // Cümle başındaki sayılar (No), Cümle sonundaki sayılar (Telefon)
+                    const noMatch = line.match(/^(\d+)/);
+                    const phoneMatch = line.match(/(\d[\d\s]*)$/);
+                    
+                    if (noMatch && phoneMatch) {
+                        const no = noMatch[1];
+                        let phone = phoneMatch[1].replace(/\D/g, '');
+                        // Ortada kalan kısım isimdir
+                        let name = line.substring(noMatch[0].length, line.length - phoneMatch[0].length).trim();
+                        parts = [no, name, phone];
+                    }
+                }
+
+                // Minimum 3 parça yakaladıysak (No, İsim, Tel)
+                if (parts.length >= 3) {
+                    const no = parts[0].trim();
+                    const name = parts[1].trim();
+                    // Son eleman genelde telefondur, numara olmayan karakterleri (boşluk vs) temizle
+                    const phone = parts[parts.length - 1].replace(/\D/g, '').trim(); 
+
+                    // İsim yazılıysa ve telefon mantıklı bir uzunluktaysa ekle
+                    if (name && phone.length > 8) {
+                        studentsData[className].push({ no, name, phone });
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                saveDataToStorage();
+                els.excelDataInput.value = ""; // Kutuyu temizle
+                showToast(`${addedCount} öğrenci başarıyla eklendi!`);
+                
+                // Eğer ana formda (Bilgi Girişi) bu sınıftaysak listeyi tetikle ki yeni öğrenciler gelsin
+                if (els.class.value === className) {
+                    els.class.dispatchEvent(new Event('change'));
+                }
+            } else {
+                showToast("Veri okunamadı. Formata dikkat edin.", "error");
+            }
+        }
+
+        // Tüm Verileri Fabrika Ayarlarına Döndür
+        function clearAllData() {
+            if (confirm("Kendi eklediğiniz tüm sınıflar silinecek ve uygulama fabrika verilerine (Sadece demo 5,6,7,8 listesi) dönecektir. Onaylıyor musunuz?")) {
+                localStorage.removeItem('veliApp_studentsData');
+                location.reload(); // Sayfayı yenile
+            }
+        }
+
+        // PWA Kurulumları için SafeArea CSS Değişkenleri (iOS çentik desteği)
+        // CSS içine eklendiği varsayılmıştır ama manuel kontrol
+        document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
+
+    </script>
+</body>
+</html>
