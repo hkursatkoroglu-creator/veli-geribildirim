@@ -261,7 +261,7 @@
                         <div class="chat-bubble">
                             <textarea id="finalMessage" class="w-full h-40 resize-none bg-transparent border-none p-0 focus:ring-0 text-[14px] leading-relaxed text-gray-800" spellcheck="false" placeholder="Mesajınız burada görünecek..."></textarea>
                             <div class="text-right text-[10px] text-gray-500 mt-1">
-                                <i class="fas fa-info-circle"></i> [ÖĞRENCİ ADI] kısımları gönderim anında otomatik değişir.
+                                <i class="fas fa-info-circle"></i> [ÖĞRENCİ ADI SOYADI] kısımları gönderim anında otomatik değişir.
                             </div>
                         </div>
                     </div>
@@ -615,17 +615,17 @@
             const task = els.task.value.trim();
             const type = els.template.value;
 
-            // Öğrenci adı yerine dinamik yer tutucu: [ÖĞRENCİ ADI]
+            // Öğrenci adı ve soyadı yerine dinamik yer tutucu: [ÖĞRENCİ ADI SOYADI]
             let msg = "";
 
             if (type === 'destekleyici') {
-                msg = `Kıymetli Velimiz Merhaba,\n\nÖğrencimiz [ÖĞRENCİ ADI]'nın akademik gelişimini desteklemek amacıyla ${formattedDate} tarihinde ${subject} dersinden vermiş olduğumuz "${task}" çalışmasının maalesef tamamlanmadığını fark ettik.\n\nÇocuklarımızın öğrenme sürecinin pekişmesi için bu tekrarlar oldukça önemlidir. Evde kendisine uygun çalışma ortamını sağlamanız ve görevi tamamlaması için motive etmeniz konusunda desteğinizi rica ediyorum.\n\nİşbirliğiniz için teşekkür eder, iyi günler dilerim. 🌸`;
+                msg = `Kıymetli Velimiz Merhaba,\n\nÖğrencimiz [ÖĞRENCİ ADI SOYADI]'nın akademik gelişimini desteklemek amacıyla ${formattedDate} tarihinde ${subject} dersinden vermiş olduğumuz "${task}" çalışmasının maalesef tamamlanmadığını fark ettik.\n\nÇocuklarımızın öğrenme sürecinin pekişmesi için bu tekrarlar oldukça önemlidir. Evde kendisine uygun çalışma ortamını sağlamanız ve görevi tamamlaması için motive etmeniz konusunda desteğinizi rica ediyorum.\n\nİşbirliğiniz için teşekkür eder, iyi günler dilerim. 🌸`;
             } 
             else if (type === 'bilgilendirici') {
-                msg = `Sayın Velimiz İyi Günler,\n\nÖğrencimiz [ÖĞRENCİ ADI], ${subject} dersinden ${formattedDate} tarihinde verilen "${task}" konulu ödevini/görevini yerine getirmemiştir.\n\nKonunun takibi ve eksiklerin telafisi hususunda bilginizi rica eder, öğrencinin evdeki çalışmalarında destek olmanızı bekleriz.\n\nİyi çalışmalar.`;
+                msg = `Sayın Velimiz İyi Günler,\n\nÖğrencimiz [ÖĞRENCİ ADI SOYADI], ${subject} dersinden ${formattedDate} tarihinde verilen "${task}" konulu ödevini/görevini yerine getirmemiştir.\n\nKonunun takibi ve eksiklerin telafisi hususunda bilginizi rica eder, öğrencinin evdeki çalışmalarında destek olmanızı bekleriz.\n\nİyi çalışmalar.`;
             }
             else if (type === 'cozumOdakli') {
-                msg = `Değerli Velimiz Merhabalar,\n\n[ÖĞRENCİ ADI] ile ilgili ${subject} dersi özelinde bir durumu paylaşmak istedim. ${formattedDate} tarihli "${task}" görevimiz ne yazık ki yapılmamış görünüyor.\n\nBazen öğrencilerimiz zaman yönetiminde zorlanabiliyor. Sizden ricam, bu çalışmayı yapması için durumu takip etmenizdir. Eğer konuyu anlamakta zorlandığı bir yer varsa lütfen bana geri dönüş yapınız ki okulda da destekleyebileyim.\n\nAnlayışınız ve desteğiniz için teşekkürler.`;
+                msg = `Değerli Velimiz Merhabalar,\n\n[ÖĞRENCİ ADI SOYADI] ile ilgili ${subject} dersi özelinde bir durumu paylaşmak istedim. ${formattedDate} tarihli "${task}" görevimiz ne yazık ki yapılmamış görünüyor.\n\nBazen öğrencilerimiz zaman yönetiminde zorlanabiliyor. Sizden ricam, bu çalışmayı yapması için durumu takip etmenizdir. Eğer konuyu anlamakta zorlandığı bir yer varsa lütfen bana geri dönüş yapınız ki okulda da destekleyebileyim.\n\nAnlayışınız ve desteğiniz için teşekkürler.`;
             }
 
             els.finalMessage.value = msg;
@@ -661,14 +661,14 @@
             const student = selectedStudentsList[index];
             const baseText = els.finalMessage.value;
             
-            // İsmi formatla (Sadece ilk ismi al, baş harfi büyük)
+            // İsmi formatla (Ad ve Soyadın baş harfleri büyük olacak şekilde ayarla)
             const nameParts = student.name.split(' ');
-            let firstName = nameParts[0];
-            if(nameParts.length > 2 && firstName.length < 4) firstName += ' ' + nameParts[1];
-            const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLocaleLowerCase('tr-TR');
+            const formattedName = nameParts.map(part => 
+                part.charAt(0).toUpperCase() + part.slice(1).toLocaleLowerCase('tr-TR')
+            ).join(' ');
             
             // Yer tutucuyu gerçek isimle değiştir (Büyük/küçük ünlü uyumuna tam girmese de 'nın/'nin için genel isim yeterlidir)
-            const finalPersonalizedMsg = baseText.replace(/\[ÖĞRENCİ ADI\]/g, formattedName);
+            const finalPersonalizedMsg = baseText.replace(/\[ÖĞRENCİ ADI SOYADI\]/g, formattedName);
             
             // Telefon numarasını formatla
             let phone = student.phone.replace(/\D/g, '');
