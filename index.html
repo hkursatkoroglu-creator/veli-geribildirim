@@ -382,20 +382,73 @@
         const defaultStudentsData = {
             "5A": [{ no: "101", name: "ALİ YILMAZ", phone: "05551112233" }],
             "5B": [{ no: "102", name: "AYŞE DEMİR", phone: "05552223344" }],
-            "6A": [{ no: "201", name: "MEHMET KAYA", phone: "05553334455" }],
-            "6B": [{ no: "202", name: "ÖRNEK ÖĞRENCİ", phone: "05550000000" }],
+            "6A": [
+                { no: "13", name: "AHMET METİN BADUR", phone: "05434780987" },
+                { no: "15", name: "BAHAR GÜNAYDIN", phone: "05434763191" },
+                { no: "18", name: "ELİF BEREN KALYONCU", phone: "05385535118" },
+                { no: "19", name: "ELİFNUR GÜNAYDIN", phone: "05375076982" },
+                { no: "20", name: "ELVİN NAZ USTA", phone: "05526451161" },
+                { no: "21", name: "EMİNE EBRAR BİLGİN", phone: "05423694974" },
+                { no: "26", name: "KERİM BİLGİN", phone: "05448803061" },
+                { no: "28", name: "MUSTAFA FİL", phone: "05435711929" },
+                { no: "30", name: "OSMAN ASAF KUM", phone: "05365166161" },
+                { no: "33", name: "SELVİ MEDİNE BİLGİN", phone: "05466358561" },
+                { no: "34", name: "TUĞÇE TAŞKIN", phone: "05365541071" },
+                { no: "36", name: "ZEHRA YILMAZ", phone: "05379585098" },
+                { no: "48", name: "POYRAZ GÖZEN", phone: "05388325690" },
+                { no: "72", name: "SÜMEYYE KUL", phone: "05065091861" },
+                { no: "103", name: "ÖMER YÜKSEL", phone: "05362639730" },
+                { no: "108", name: "MUHAMMET YAĞIZ BİLGİN", phone: "05377393294" },
+                { no: "212", name: "ADİL EROL İKİNCİ", phone: "05532459233" }
+            ],
+            "6B": [
+                { no: "11", name: "AÇELYA BİLGİN", phone: "05434672923" },
+                { no: "12", name: "AHMET BARAN KUM", phone: "05066334050" },
+                { no: "14", name: "ALVİNA NUR FİL", phone: "05319170486" },
+                { no: "16", name: "BEREN KOCAMAN", phone: "05464762437" },
+                { no: "17", name: "CANER BAYRAKTAR", phone: "05442349458" },
+                { no: "25", name: "GAMZE BÜLBÜL", phone: "05315199185" },
+                { no: "27", name: "MUHAMMET ASAF FURUNCU", phone: "05424672161" },
+                { no: "29", name: "NAZLI ERKAN", phone: "05316293161" },
+                { no: "32", name: "RABİA BİLGİN", phone: "05067125570" },
+                { no: "35", name: "YAREN FİL", phone: "05375927449" },
+                { no: "37", name: "ZEYNEP ERVA GELDİ", phone: "05468065115" },
+                { no: "57", name: "ELA ZENCİRKIRAN", phone: "05422711481" },
+                { no: "61", name: "ÖMER KÖROĞLU", phone: "05058088903" },
+                { no: "71", name: "ÖZGÜR SEVENCAN", phone: "05058053584" },
+                { no: "122", name: "ÖMER ASAF BAHAR", phone: "05436355982" },
+                { no: "245", name: "ASEL GÜR", phone: "05365107369" },
+                { no: "391", name: "NİHAL DEMİR", phone: "05448459561" }
+            ],
             "7A": [{ no: "301", name: "ZEYNEP ÇELİK", phone: "05554445566" }],
             "7B": [{ no: "302", name: "BURAK ŞAHİN", phone: "05555556677" }],
-            "8A": [{ no: "401", name: "ELİF ARSLAN", phone: "05556667788" }],
+            "8A": [
+                { no: "177", name: "EGEMEN ŞİRİN", phone: "05304146811" },
+                { no: "301", name: "ABDULKERİM BADUR", phone: "05434780866" },
+                { no: "305", name: "BEYZA NUR BİLGİN", phone: "" },
+                { no: "307", name: "BUSE AZELYA ERKAN", phone: "05456152387" },
+                { no: "309", name: "EFE MUSA GÜRDAL", phone: "05616155549" },
+                { no: "310", name: "ELİF SU BİLGİN", phone: "05423094019" },
+                { no: "312", name: "ETHEM AHMET TURUM", phone: "" },
+                { no: "313", name: "GÜLSÜM YILMAZ", phone: "05454156725" },
+                { no: "316", name: "HİLAL ALYA BİLGİN", phone: "05415484847" },
+                { no: "319", name: "MİRAÇ DİNÇ", phone: "05352398778" },
+                { no: "321", name: "ÖMER ASAF ÇOLAKOĞLU", phone: "05448566230" },
+                { no: "322", name: "ÖMER FARUK TEKNECİ", phone: "05426591769" },
+                { no: "324", name: "SEMANUR BAYRAKTAR", phone: "05468700061" },
+                { no: "330", name: "ZEYNEP KAYA", phone: "05378584941" },
+                { no: "628", name: "GÖKAY BOZBAŞ", phone: "05418974950" }
+            ],
             "8B": [{ no: "402", name: "ONUR BOZ", phone: "05557778899" }]
         };
 
         // Cihazın hafızasından kayıtlı verileri çek (Yoksa varsayılanı kullan)
-        let studentsData = JSON.parse(localStorage.getItem('veliApp_studentsData')) || defaultStudentsData;
+        // VERİ TABANI VERSİYONU v2 YAPILDI: Eski önbellekler otomatik atlanıp yeni gömülü listeler yüklenecek.
+        let studentsData = JSON.parse(localStorage.getItem('veliApp_studentsData_v2')) || defaultStudentsData;
 
         // Verileri hafızaya kaydetme fonksiyonu
         function saveDataToStorage() {
-            localStorage.setItem('veliApp_studentsData', JSON.stringify(studentsData));
+            localStorage.setItem('veliApp_studentsData_v2', JSON.stringify(studentsData));
             updateClassSelectDropdowns();
         }
 
@@ -872,8 +925,8 @@
 
         // Tüm Verileri Fabrika Ayarlarına Döndür
         function clearAllData() {
-            if (confirm("Kendi eklediğiniz tüm sınıflar silinecek ve uygulama fabrika verilerine (Sadece demo 5,6,7,8 listesi) dönecektir. Onaylıyor musunuz?")) {
-                localStorage.removeItem('veliApp_studentsData');
+            if (confirm("Kendi eklediğiniz tüm sınıflar silinecek ve uygulama fabrika verilerine (Sizin eklediğiniz 6A, 6B, 8A listeleri) dönecektir. Onaylıyor musunuz?")) {
+                localStorage.removeItem('veliApp_studentsData_v2');
                 location.reload(); // Sayfayı yenile
             }
         }
