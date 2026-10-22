@@ -383,23 +383,23 @@
             "5A": [{ no: "101", name: "ALİ YILMAZ", phone: "05551112233" }],
             "5B": [{ no: "102", name: "AYŞE DEMİR", phone: "05552223344" }],
             "6A": [
-                { no: "13", name: "AHMET METİN BADUR", phone: "05434780987" },
-                { no: "15", name: "BAHAR GÜNAYDIN", phone: "05434763191" },
-                { no: "18", name: "ELİF BEREN KALYONCU", phone: "05385535118" },
-                { no: "19", name: "ELİFNUR GÜNAYDIN", phone: "05375076982" },
-                { no: "20", name: "ELVİN NAZ USTA", phone: "05526451161" },
-                { no: "21", name: "EMİNE EBRAR BİLGİN", phone: "05423694974" },
-                { no: "26", name: "KERİM BİLGİN", phone: "05448803061" },
-                { no: "28", name: "MUSTAFA FİL", phone: "05435711929" },
-                { no: "30", name: "OSMAN ASAF KUM", phone: "05365166161" },
-                { no: "33", name: "SELVİ MEDİNE BİLGİN", phone: "05466358561" },
+                { no: "13", name: "AHMET METİN BADUR", phone: "05434780866" },
+                { no: "15", name: "BAHAR GÜNAYDIN", phone: "05353242715" },
+                { no: "18", name: "ELİF BEREN KALYONCU", phone: "05362898003" },
+                { no: "19", name: "ELİFNUR GÜNAYDIN", phone: "05055987685" },
+                { no: "20", name: "ELVİN NAZ USTA", phone: "05418150161" },
+                { no: "21", name: "EMİNE EBRAR BİLGİN", phone: "05369644932" },
+                { no: "26", name: "KERİM BİLGİN", phone: "05366703258" },
+                { no: "28", name: "MUSTAFA FİL", phone: "05368875192" },
+                { no: "30", name: "OSMAN ASAF KUM", phone: "05467242855" },
+                { no: "33", name: "SELVİ MEDİNE BİLGİN", phone: "05350554238" },
                 { no: "34", name: "TUĞÇE TAŞKIN", phone: "05365541071" },
-                { no: "36", name: "ZEHRA YILMAZ", phone: "05379585098" },
-                { no: "48", name: "POYRAZ GÖZEN", phone: "05388325690" },
-                { no: "72", name: "SÜMEYYE KUL", phone: "05065091861" },
-                { no: "103", name: "ÖMER YÜKSEL", phone: "05362639730" },
-                { no: "108", name: "MUHAMMET YAĞIZ BİLGİN", phone: "05377393294" },
-                { no: "212", name: "ADİL EROL İKİNCİ", phone: "05532459233" }
+                { no: "36", name: "ZEHRA YILMAZ", phone: "05342961768" },
+                { no: "48", name: "POYRAZ GÖZEN", phone: "05355464057" },
+                { no: "72", name: "SÜMEYYE KUL", phone: "05522457861" },
+                { no: "103", name: "ÖMER YÜKSEL", phone: "05427798161" },
+                { no: "108", name: "MUHAMMET YAĞIZ BİLGİN", phone: "05063369555" },
+                { no: "212", name: "ADİ EROL İKİNCİ", phone: "05316298668" }
             ],
             "6B": [
                 { no: "11", name: "AÇELYA BİLGİN", phone: "05434672923" },
@@ -443,12 +443,12 @@
         };
 
         // Cihazın hafızasından kayıtlı verileri çek (Yoksa varsayılanı kullan)
-        // VERİ TABANI VERSİYONU v2 YAPILDI: Eski önbellekler otomatik atlanıp yeni gömülü listeler yüklenecek.
-        let studentsData = JSON.parse(localStorage.getItem('veliApp_studentsData_v2')) || defaultStudentsData;
+        // VERİ TABANI VERSİYONU v3 YAPILDI: Eski önbellekler otomatik atlanıp yeni gömülü listeler yüklenecek.
+        let studentsData = JSON.parse(localStorage.getItem('veliApp_studentsData_v3')) || defaultStudentsData;
 
         // Verileri hafızaya kaydetme fonksiyonu
         function saveDataToStorage() {
-            localStorage.setItem('veliApp_studentsData_v2', JSON.stringify(studentsData));
+            localStorage.setItem('veliApp_studentsData_v3', JSON.stringify(studentsData));
             updateClassSelectDropdowns();
         }
 
@@ -926,7 +926,7 @@
         // Tüm Verileri Fabrika Ayarlarına Döndür
         function clearAllData() {
             if (confirm("Kendi eklediğiniz tüm sınıflar silinecek ve uygulama fabrika verilerine (Sizin eklediğiniz 6A, 6B, 8A listeleri) dönecektir. Onaylıyor musunuz?")) {
-                localStorage.removeItem('veliApp_studentsData_v2');
+                localStorage.removeItem('veliApp_studentsData_v3');
                 location.reload(); // Sayfayı yenile
             }
         }
